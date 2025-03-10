@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Social Intelligence Quiz</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        #app {
+            max-width: 500px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+        
+        .score {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .question-container {
+            margin-bottom: 24px;
+        }
+        
+        .question-count {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        
+        .description {
+            font-style: italic;
+            margin-bottom: 16px;
+        }
+        
+        .prompt {
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .option {
+            width: 100%;
+            text-align: center;
+            padding: 12px;
+            background-color: #c7d2fe;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            font: inherit;
+        }
+        
+        .option:hover {
+            background-color: #a5b4fc;
+        }
+        
+        .feedback {
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            color: white;
+        }
+        
+        .correct {
+            background-color: #6d28d9;
+        }
+        
+        .incorrect {
+            background-color: #dc2626;
+        }
+        
+        .feedback-header {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .button {
+            width: 100%;
+            background-color: #1f2937;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            font: inherit;
+        }
+        
+        .button:hover {
+            background-color: #111827;
+        }
+        
+        .center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        // Game data
+        const scenarios = [
+            {
+                setting: "Tech Startup Office",
+                description: "You've just joined a trendy tech startup. It's your first day, and you notice everyone is dressed casually and working with headphones on. Someone mentions a 'stand-up' happening in 5 minutes.",
+                question: "What's the appropriate response?",
+                choices: [
+                    { 
+                        text: "Put on formal attire for the stand-up meeting to make a good impression", 
+                        correct: false, 
+                        feedback: "Too formal! Tech startups often have casual dress codes. 'Stand-up' refers to a quick daily team check-in where people literally stand up, not a formal presentation." 
+                    },
+                    { 
+                        text: "Grab your laptop and join the circle of people gathering in the open space area", 
+                        correct: true, 
+                        feedback: "Correct! In tech environments, 'stand-up' refers to a quick daily meeting where team members briefly share updates while standing up." 
+                    },
+                    { 
+                        text: "Start practicing your comedy routine since they want you to perform", 
+                        correct: false, 
+                        feedback: "Not that kind of stand-up! In tech, a 'stand-up' is a brief team meeting to share progress and blockers, not a comedy performance." 
+                    },
+                    { 
+                        text: "Ignore it since you're new and it probably doesn't apply to you", 
+                        correct: false, 
+                        feedback: "Missing out! Stand-ups are specifically designed to include everyone on the team, especially new members." 
+                    }
+                ]
+            },
+            {
+                setting: "Creative Agency",
+                description: "You're at a collaborative brainstorming session at a design agency. The project lead says they want to 'blue sky' some ideas before getting 'down in the weeds'.",
+                question: "According to this creative environment, what should you do?",
+                choices: [
+                    { 
+                        text: "Start discussing detailed technical limitations of each potential approach", 
+                        correct: false, 
+                        feedback: "That's getting 'in the weeds' too early! Blue sky thinking is about exploring possibilities without immediate constraints." 
+                    },
+                    { 
+                        text: "Suggest looking at the sky for inspiration and stepping outside", 
+                        correct: false, 
+                        feedback: "While creative, that's not what 'blue sky' means in this context. It's about unconstrained ideation, not literal sky-gazing." 
+                    },
+                    { 
+                        text: "Share bold, imaginative ideas without worrying about practical limitations yet", 
+                        correct: true, 
+                        feedback: "Exactly right! 'Blue sky' thinking means brainstorming without constraints, while 'getting in the weeds' means dealing with details later." 
+                    },
+                    { 
+                        text: "Focus only on blue-colored design elements in your suggestions", 
+                        correct: false, 
+                        feedback: "That's taking the term too literally! 'Blue sky' refers to thinking without limitations, not the color blue." 
+                    }
+                ]
+            },
+            {
+                setting: "Remote Work Meeting",
+                description: "You're joining a video call with a team you haven't met before. As people join, some have cameras on and others off. The meeting organizer says, 'Let's do a quick round-robin check-in.'",
+                question: "What's the expected behavior here?",
+                choices: [
+                    { 
+                        text: "Turn your camera on and prepare to introduce yourself briefly when your turn comes", 
+                        correct: true, 
+                        feedback: "Perfect! A 'round-robin' means everyone takes a turn to speak, and having your camera on (if possible) shows engagement in a new group." 
+                    },
+                    { 
+                        text: "Post a lengthy introduction about yourself in the chat", 
+                        correct: false, 
+                        feedback: "This might disrupt the flow. 'Round-robin' suggests a verbal, turn-based check-in, not written introductions." 
+                    },
+                    { 
+                        text: "Stay silent until directly asked a specific question", 
+                        correct: false, 
+                        feedback: "Too passive! A round-robin means everyone is expected to participate by sharing a brief update or introduction." 
+                    },
+                    { 
+                        text: "Immediately begin describing your work on the project without waiting", 
+                        correct: false, 
+                        feedback: "Jumping ahead! Round-robin format means waiting for your turn in an organized sequence." 
+                    }
+                ]
+            },
+            {
+                setting: "Design Critique Session",
+                description: "You're participating in a design critique. A colleague presents their work and asks for 'constructive feedback, not just what's working.'",
+                question: "Based on the critique sessions, how should you respond?",
+                choices: [
+                    { 
+                        text: "List everything you dislike about the design", 
+                        correct: false, 
+                        feedback: "Too negative! Constructive feedback includes both strengths and specific suggestions for improvement." 
+                    },
+                    { 
+                        text: "Focus only on positive aspects to avoid hurting feelings", 
+                        correct: false, 
+                        feedback: "While kind, this ignores their specific request for more than just 'what's working.'" 
+                    },
+                    { 
+                        text: "Offer specific observations with suggestions for improvements, while also noting strengths", 
+                        correct: true, 
+                        feedback: "Excellent! Constructive feedback is balanced, specific, and actionable - exactly what they requested." 
+                    },
+                    { 
+                        text: "Suggest they start over with a completely different approach", 
+                        correct: false, 
+                        feedback: "Rarely helpful! Constructive feedback builds on existing work rather than dismissing it entirely." 
+                    }
+                ]
+            },
+            {
+                setting: "Accessibility-Focused Team",
+                description: "You've joined a team that emphasizes inclusive design. During a presentation, the lead says, 'Remember our mantra: nothing about us without us.'",
+                question: "What principle is being communicated here?",
+                choices: [
+                    { 
+                        text: "All team decisions must be unanimous", 
+                        correct: false, 
+                        feedback: "Not quite. While inclusive, this phrase has a more specific meaning about representation." 
+                    },
+                    { 
+                        text: "Never design for users with disabilities without their direct involvement and feedback", 
+                        correct: true, 
+                        feedback: "Exactly right! 'Nothing about us without us' is a core principle in accessibility advocacy, emphasizing that those affected should be involved in the process." 
+                    },
+                    { 
+                        text: "Team members shouldn't talk about each other when they're not present", 
+                        correct: false, 
+                        feedback: "While respectful, this phrase has a more specific meaning in accessibility contexts." 
+                    },
+                    { 
+                        text: "Documentation should be comprehensive and include everyone's contributions", 
+                        correct: false, 
+                        feedback: "Good practice, but not what this specific phrase is referencing in accessibility contexts." 
+                    }
+                ]
+            }
+        ];
+
+        // Game state
+        let currentScenario = 0;
+        let score = 0;
+        let gameState = 'playing'; // 'playing', 'feedback', 'complete'
+        let selectedChoice = null;
+
+        // DOM elements
+        const appElement = document.getElementById('app');
+
+        // Render functions
+        function renderGame() {
+            if (gameState === 'complete') {
+                renderComplete();
+            } else {
+                renderQuestion();
+            }
+        }
+
+        function renderQuestion() {
+            const current = scenarios[currentScenario];
+            
+            let html = `
+                <h1 class="title">The Social Intelligence Quiz</h1>
+                <div class="score">Score: ${score}</div>
+                <div class="question-container">
+                    <div class="question-count">Question ${currentScenario + 1} of ${scenarios.length}</div>
+                    <p class="description">${current.description}</p>
+                    <p class="prompt">${current.question}</p>
+                </div>
+            `;
+
+            if (gameState === 'playing') {
+                html += `<div class="options">`;
+                current.choices.forEach((choice, index) => {
+                    html += `<button class="option" onclick="handleChoice(${index})">${choice.text}</button>`;
+                });
+                html += `</div>`;
+            } else {
+                const choice = current.choices[selectedChoice];
+                const feedbackClass = choice.correct ? 'correct' : 'incorrect';
+                const feedbackIcon = choice.correct ? '✓' : '✗';
+                const feedbackTitle = choice.correct ? 'Correct!' : 'Not quite!';
+                
+                html += `
+                    <div class="feedback ${feedbackClass}">
+                        <p class="feedback-header">${feedbackIcon} ${feedbackTitle}</p>
+                        <p>${choice.feedback}</p>
+                    </div>
+                    <button class="button" onclick="handleContinue()">Continue</button>
+                `;
+            }
+
+            appElement.innerHTML = html;
+        }
+
+        function renderComplete() {
+            let feedback = '';
+            if (score === scenarios.length) {
+                feedback = '<p style="margin-bottom: 16px; font-weight: 600; color: #16a34a;">Perfect score! You\'re a master!</p>';
+            } else if (score >= scenarios.length * 0.7) {
+                feedback = '<p style="margin-bottom: 16px; font-weight: 600; color: #2563eb;">Great job! You\'ve got a strong sense of social vibes.</p>';
+            } else {
+                feedback = '<p style="margin-bottom: 16px; font-weight: 600; color: #ea580c;">Good effort! Social vibe codes can be tricky to navigate.</p>';
+            }
+
+            const html = `
+                <h1 class="title">The Social Intelligence Quiz</h1>
+                <div class="score">Score: ${score}</div>
+                <div class="center">
+                    <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 16px;">Game Complete!</h2>
+                    <p style="font-size: 18px; margin-bottom: 16px;">You scored ${score} out of ${scenarios.length}!</p>
+                    ${feedback}
+                    <p style="margin-bottom: 24px;">Understanding vibe codes helps with social integration, but remember: explicit communication creates more accessible environments for everyone.</p>
+                    <button class="button" onclick="resetGame()">Play Again</button>
+                </div>
+            `;
+
+            appElement.innerHTML = html;
+        }
+
+        // Event handlers
+        function handleChoice(index) {
+            selectedChoice = index;
+            gameState = 'feedback';
+            
+            if (scenarios[currentScenario].choices[index].correct) {
+                score++;
+            }
+            
+            renderGame();
+        }
+
+        function handleContinue() {
+            if (currentScenario < scenarios.length - 1) {
+                currentScenario++;
+                selectedChoice = null;
+                gameState = 'playing';
+            } else {
+                gameState = 'complete';
+            }
+            
+            renderGame();
+        }
+
+        function resetGame() {
+            currentScenario = 0;
+            score = 0;
+            selectedChoice = null;
+            gameState = 'playing';
+            
+            renderGame();
+        }
+
+        // Start the game
+        renderGame();
+
+        // Make functions available globally
+        window.handleChoice = handleChoice;
+        window.handleContinue = handleContinue;
+        window.resetGame = resetGame;
+    </script>
+</body>
+</html>
